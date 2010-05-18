@@ -22,7 +22,6 @@ begin
     MemCacheTimer = Timeout
   end
 rescue LoadError => e
-  puts "[memcache-client] Could not load SystemTimer gem, falling back to Ruby's slower/unsafe timeout library: #{e.message}"
   require 'timeout'
   MemCacheTimer = Timeout
 end
