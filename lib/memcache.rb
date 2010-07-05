@@ -22,7 +22,6 @@ begin
     MemCacheTimer = Timeout
   end
 rescue LoadError => e
-  puts "[memcache-client] Could not load SystemTimer gem, falling back to Ruby's slower/unsafe timeout library: #{e.message}"
   require 'timeout'
   MemCacheTimer = Timeout
 end
@@ -1015,8 +1014,10 @@ class MemCache
       @status = 'NOT CONNECTED'
       @timeout = memcache.timeout
       @logger = memcache.logger
-      
-      self.extend(MemCache::EventedServer) if defined?(EM) and EM.reactor_running?
+
+      if defined?(EM) and EM.reactor_running? and defined?(MemCache::EventedServer)
+        self.extend(MemCache::EventedServer)
+      end
     end
 
     ##
