@@ -1,3 +1,7 @@
+= 1.8.6 (HEAD)
+
+ * Use String#bytesize so non-ascii characters write correctly to the socket.
+
 = 1.8.5 (2010-07-05)
 
  * Fix bad release
