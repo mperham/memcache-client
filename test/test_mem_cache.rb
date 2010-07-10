@@ -803,7 +803,23 @@ class TestMemCache < Test::Unit::TestCase
 
     dumped = Marshal.dump('value')
     expected = "set my_namespace:key 0 0 #{dumped.length}\r\n#{dumped}\r\n"
-#    expected = "set my_namespace:key 0 0 9\r\n\004\b\"\nvalue\r\n"
+    assert_equal expected, server.socket.written.string
+  end
+
+  def test_set_utf8
+    server = FakeServer.new
+    server.socket.data.write "STORED\r\n"
+    server.socket.data.rewind
+    @cache.servers = []
+    @cache.servers << server
+
+    @cache.set 'key', 'value 启'
+
+    dumped = Marshal.dump('value 启')
+
+    expected = "set my_namespace:key 0 0 #{dumped.bytesize}\r\n"
+    expected << dumped
+    expected << "\r\n"
     assert_equal expected, server.socket.written.string
   end
 
@@ -831,6 +847,20 @@ class TestMemCache < Test::Unit::TestCase
     @cache.set 'key', 'value', 0, true
 
     expected = "set my_namespace:key 0 0 5\r\nvalue\r\n"
+    assert_equal expected, server.socket.written.string
+  end
+
+  def test_set_utf8_raw
+    server = FakeServer.new
+    server.socket.data.write "STORED\r\n"
+    server.socket.data.rewind
+    @cache.servers = []
+    @cache.servers << server
+
+    val = 'value 启'
+    @cache.set 'key', val, 0, true
+
+    expected = "set my_namespace:key 0 0 #{val.bytesize}\r\n#{val}\r\n"
     assert_equal expected, server.socket.written.string
   end
 
