@@ -1259,6 +1259,8 @@ class TestMemCache < Test::Unit::TestCase
             cache.set('d', 'a', 100, true)
             cache.set('e', 'x', 100, true)
             cache.set('f', 'zzz')
+            cache.set('g', '1ብbሲg')
+            cache.set('Ẽ뷽cc벼g', 'batman')
             assert_not_nil(cache.cas('f') do |value|
               value << 'z'
             end)
@@ -1271,6 +1273,8 @@ class TestMemCache < Test::Unit::TestCase
             assert inc > 14
             assert cache.decr('c', 5) > 14
             assert_equal 11, cache.get('b')
+            assert_equal '1ብbሲg', cache.get('g')
+            assert_equal 'batman', cache.get('Ẽ뷽cc벼g')
             d = cache.get('d', true)
             assert_match(/\Aab*\Z/, d)
             e = cache.get('e', true)
@@ -1281,6 +1285,24 @@ class TestMemCache < Test::Unit::TestCase
 
       workers.each { |w| w.join }
       cache.flush_all
+    end
+  end
+
+  def test_custom_encoding
+    requirement(memcached_running?, 'A memcached server must be running for live testing') do
+      key = "£"
+      array = [180,250,184,213]
+      value = array.pack('c*')
+      value.force_encoding('big5')
+      assert_equal array, value.bytes.to_a
+
+      m = MemCache.new 'localhost'
+      m.set(key, value)
+      result = m.get(key)
+      assert_equal(value, result)
+      assert_equal(value.encoding.name, result.encoding.name)
+      # m.set(key, value, true)
+      # assert_equal(value, m.get(key))
     end
   end
 

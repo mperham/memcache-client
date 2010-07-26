@@ -371,10 +371,10 @@ class MemCache
         raise MemCacheError, "Value too large, memcached can only store 1MB of data per key"
       end
 
-      command = "set #{cache_key} 0 #{expiry} #{value.to_s.bytesize}#{noreply}\r\n#{value}\r\n"
-
       with_socket_management(server) do |socket|
-        socket.write command
+        socket.write "set #{cache_key} 0 #{expiry} #{value.to_s.bytesize}#{noreply}\r\n"
+        socket.write value.to_s
+        socket.write "\r\n"
         break nil if @no_reply
         result = socket.gets
         raise_on_error_response! result
@@ -1152,7 +1152,17 @@ class MemCache
     end
 
     def gets
-      readuntil("\n")
+      encode(readuntil("\n"))
+    end
+
+    if defined?(Encoding)
+      def encode(str)
+        str.force_encoding(Encoding.default_external)
+      end
+    else
+      def encode(str)
+        str
+      end
     end
   end
 
