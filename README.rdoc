@@ -2,6 +2,9 @@
 
 A ruby library for accessing memcached.
 
+== memcache-client is deprecated as of August 2010.  It will be supported through 2010 but new code should use Dalli[http://github.com/mperham/dalli] instead.
+
+
 Source:
 
 http://github.com/mperham/memcache-client
