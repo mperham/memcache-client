@@ -555,7 +555,7 @@ class TestMemCache < Test::Unit::TestCase
       @cache.get 'my_namespace:key'
     end
 
-    assert_equal 'unknown error - some syscall error', e.message
+    assert_equal 'unknown error - some syscall error', e.message.downcase
   end
 
   def test_get_no_connection
@@ -1285,6 +1285,19 @@ class TestMemCache < Test::Unit::TestCase
 
       workers.each { |w| w.join }
       cache.flush_all
+    end
+  end
+
+  def test_large_value
+    requirement(memcached_running?, 'A memcached server must be running for live testing') do
+      m = MemCache.new 'localhost'
+      value = '1234567890'*500000
+      assert_raises MemCache::MemCacheError do
+        m.set('large_value', value)
+      end
+      value = '1234567890'*50000
+      m.set('large_value', value)
+      assert_equal value, m.get('large_value')
     end
   end
 
