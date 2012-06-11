@@ -306,7 +306,6 @@ class MemCache
     opts = keys.last.is_a?(Hash) ? keys.pop : {}
 
     keys.flatten!
-    key_count = keys.length
     cache_keys = {}
     server_keys = Hash.new { |h,k| h[k] = [] }
 
@@ -815,8 +814,7 @@ class MemCache
           raise MemCacheError, "unexpected response #{keyline.inspect}"
         end
 
-        key, data_length = $1, $3
-        values[$1] = socket.read data_length.to_i
+        values[$1] = socket.read $3.to_i
         socket.read(2) # "\r\n"
       end
 
