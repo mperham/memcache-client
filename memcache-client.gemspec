@@ -44,6 +44,7 @@ Gem::Specification.new do |s|
      "test/test_event_machine.rb",
      "test/test_mem_cache.rb"
   ]
+  s.license = "BSD-3-Clause"
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
