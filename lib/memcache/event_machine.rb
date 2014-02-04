@@ -17,17 +17,16 @@ class MemCache
     def fiber_key
       @fiber_key ||= "memcached-#{@host}-#{@port}"
     end
-    
-    def socket
-      sock = Thread.current[fiber_key]
-      return sock if sock and not sock.closed?
 
-      Thread.current[fiber_key] = nil
+    def socket
+      return @sock if @sock and not @sock.closed?
+
+      @sock = nil
 
       # If the host was dead, don't retry for a while.
       return if @retry and @retry > Time.now
     
-      Thread.current[fiber_key] ||= begin
+      @sock ||= begin
         sock = EM::SocketConnection.connect(@host, @port, @timeout)
         yielding = true
         fiber = Fiber.current
@@ -48,10 +47,9 @@ class MemCache
     end
 
     def close
-      sock = Thread.current[fiber_key]
-      if sock
-        sock.close if !sock.closed?
-        Thread.current[fiber_key] = nil
+      if @sock
+        @sock.close if !@sock.closed?
+        @sock = nil
       end
       @retry  = nil
       @status = "NOT CONNECTED"
