@@ -857,10 +857,11 @@ class MemCache
   def with_socket_management(server, &block)
     check_multithread_status!
 
-    @mutex.lock if @multithread
     retried = false
 
     begin
+      @mutex.lock if @multithread and !retried
+      
       socket = server.socket
 
       # Raise an IndexError to show this server is out of whack. If were inside
